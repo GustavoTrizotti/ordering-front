@@ -9,9 +9,5 @@ export default async function AppLayout({ children }: PropsWithChildren) {
     redirect(authConfig.loginPath)
   }
 
-  return (
-    <div>
-      <h1>app</h1>
-    </div>
-  )
+  return <>{children}</>
 }

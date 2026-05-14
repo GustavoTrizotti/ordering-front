@@ -8,7 +8,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Ordering",
-  description: "The new ordering e-commerce platform for testing purposes.",
+  description: "The new ordering e-commerce platform for testing purposes.",  
 }
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })

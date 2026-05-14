@@ -1,7 +1,5 @@
-export function DashboardPage() {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
-  )
+import { ShopHome } from "@/components/shop-home"
+
+export default function ShopHomePage() {
+  return <ShopHome />
 }
