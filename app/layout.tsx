@@ -2,13 +2,14 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 
+import { AppQueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Ordering",
-  description: "The new ordering e-commerce platform for testing purposes.",  
+  description: "The new ordering e-commerce platform for testing purposes.",
 }
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
@@ -35,7 +36,9 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AppQueryProvider>{children}</AppQueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
