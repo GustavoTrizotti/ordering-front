@@ -13,6 +13,7 @@ type CartStore = {
   items: CartItem[]
   addItem: (product: ShopProduct) => void
   removeItem: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   getItemCount: () => number
   getSubtotal: () => number
@@ -43,6 +44,16 @@ export const useCartStore = create<CartStore>((set, get) => ({
   removeItem: (productId) =>
     set((state) => ({
       items: state.items.filter((item) => item.product.id !== productId),
+    })),
+  updateQuantity: (productId, quantity) =>
+    set((state) => ({
+      items: state.items
+        .map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: Math.max(1, quantity) }
+            : item
+        )
+        .filter((item) => item.quantity > 0),
     })),
   clearCart: () => set({ items: [] }),
   getItemCount: () =>

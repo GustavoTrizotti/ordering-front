@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight, ShoppingBag, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -160,6 +161,7 @@ function ProductSectionBlock({
 }
 
 function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const router = useRouter()
   const items = useCartStore((state) => state.items)
   const removeItem = useCartStore((state) => state.removeItem)
   const clearCart = useCartStore((state) => state.clearCart)
@@ -258,6 +260,10 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             <Button
               type="button"
               disabled={items.length === 0}
+              onClick={() => {
+                onClose()
+                router.push("/app/checkout")
+              }}
               className="h-11 rounded-full bg-white text-black hover:bg-neutral-200"
             >
               Checkout

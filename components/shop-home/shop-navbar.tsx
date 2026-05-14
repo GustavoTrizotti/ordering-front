@@ -31,18 +31,24 @@ export function ShopNavbar({ onCartClick }: ShopNavbarProps) {
         </Link>
 
         <div className="hidden items-center gap-7 text-sm font-medium text-neutral-500 md:flex">
-          <a className="transition-colors hover:text-white" href="#featured">
+          <Link className="transition-colors hover:text-white" href="/app#featured">
             Featured
-          </a>
-          <a className="transition-colors hover:text-white" href="#sale">
+          </Link>
+          <Link className="transition-colors hover:text-white" href="/app#sale">
             Sale
-          </a>
-          <a className="transition-colors hover:text-white" href="#new">
+          </Link>
+          <Link className="transition-colors hover:text-white" href="/app#new">
             New arrivals
-          </a>
-          <a className="transition-colors hover:text-white" href="#categories">
+          </Link>
+          <Link
+            className="transition-colors hover:text-white"
+            href="/app#categories"
+          >
             Categories
-          </a>
+          </Link>
+          <Link className="transition-colors hover:text-white" href="/app/orders">
+            Orders
+          </Link>
         </div>
 
         <Button
