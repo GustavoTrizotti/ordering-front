@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { Loader2, PackageX, RotateCcw } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 import { ShopNavbar } from "@/components/shop-home/shop-navbar"
 import { Button } from "@/components/ui/button"
@@ -38,6 +39,21 @@ export function OrdersPage() {
   const cancelOrderMutation = useCancelOrderMutation()
   const orders = useOrdersStore((state) => state.orders)
   const setOrders = useOrdersStore((state) => state.setOrders)
+
+  function handleCancelOrder(orderId: string) {
+    cancelOrderMutation.mutate(orderId, {
+      onSuccess: () => {
+        toast.success("Order canceled", {
+          description: `Order ${orderId} was canceled.`,
+        })
+      },
+      onError: () => {
+        toast.error("Could not cancel order", {
+          description: "Please try again in a moment.",
+        })
+      },
+    })
+  }
 
   useEffect(() => {
     if (ordersQuery.data) {
@@ -151,7 +167,7 @@ export function OrdersPage() {
                     type="button"
                     variant="outline"
                     disabled={cancelOrderMutation.isPending}
-                    onClick={() => cancelOrderMutation.mutate(order.orderId)}
+                    onClick={() => handleCancelOrder(order.orderId)}
                     className="h-10 rounded-full border-neutral-800 bg-black text-white hover:bg-neutral-900"
                   >
                     {cancelOrderMutation.isPending ? (

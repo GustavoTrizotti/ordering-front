@@ -1,17 +1,17 @@
+import { ApiError } from "@/lib/api/api-client"
 import { authConfig } from "@/lib/auth/auth-config"
 import { authService } from "@/lib/auth/auth-service"
 import { createSessionToken } from "@/lib/auth/auth-session"
-import { ApiError } from "@/lib/api/api-client"
-import { loginCredentialsSchema } from "@/lib/types/login-credentials-schema"
+import { registerRequestSchema } from "@/lib/types/auth-dtos"
 import { NextResponse } from "next/server"
 import { ZodError } from "zod"
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const credentials = loginCredentialsSchema.parse(body)
+    const credentials = registerRequestSchema.parse(body)
 
-    const result = await authService.loginWithCredentials(credentials)
+    const result = await authService.register(credentials)
     const token = await createSessionToken({ user: result.user })
     const response = NextResponse.json({
       user: result.user,
@@ -30,12 +30,7 @@ export async function POST(request: Request) {
     return response
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          message: error.message,
-        },
-        { status: 400 }
-      )
+      return NextResponse.json({ message: error.message }, { status: 400 })
     }
     if (error instanceof ApiError) {
       return NextResponse.json(
@@ -46,9 +41,10 @@ export async function POST(request: Request) {
         { status: error.status }
       )
     }
+
     return NextResponse.json(
       {
-        message: "Unable to sign in",
+        message: "Unable to register",
       },
       { status: 500 }
     )

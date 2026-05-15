@@ -1,4 +1,11 @@
-import { authSessionPayloadSchema } from "./auth-session-payload-schema"
+import z from "zod"
 
-export const loginResultSchema = authSessionPayloadSchema
-export type LoginResult = ReturnType<typeof loginResultSchema.parse>
+import { authUserSchema } from "./auth-user-scema"
+
+export const loginResultSchema = z.object({
+  accessToken: z.string().min(1),
+  refreshToken: z.string().min(1).optional(),
+  user: authUserSchema,
+})
+
+export type LoginResult = z.infer<typeof loginResultSchema>

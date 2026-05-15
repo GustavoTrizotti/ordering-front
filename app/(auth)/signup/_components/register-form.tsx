@@ -1,9 +1,9 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion } from "framer-motion"
-import { ArrowLeft, ArrowRight, Loader2, LockKeyhole } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
@@ -21,44 +21,24 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Logo } from "@/components/ui/logo"
 import {
-  LoginCredentials,
-  loginCredentialsSchema,
-} from "@/lib/types/login-credentials-schema"
-import {
   getAuthErrorMessage,
   readAuthResponse,
 } from "@/lib/auth/client-auth-actions"
+import {
+  RegisterRequestDTO,
+  registerRequestSchema,
+} from "@/lib/types/auth-dtos"
 
-type LoginFormProps = {
-  redirectTo?: string
-}
-
-function getSafeRedirectPath(redirectTo?: string) {
-  if (
-    !redirectTo ||
-    !redirectTo.startsWith("/") ||
-    redirectTo.startsWith("//")
-  ) {
-    return "/app"
-  }
-
-  return redirectTo
-}
-
-export function LoginForm({ redirectTo }: LoginFormProps) {
+export function RegisterForm() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
-  const safeRedirectTo = useMemo(
-    () => getSafeRedirectPath(redirectTo),
-    [redirectTo]
-  )
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginCredentials>({
-    resolver: zodResolver(loginCredentialsSchema),
+  } = useForm<RegisterRequestDTO>({
+    resolver: zodResolver(registerRequestSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -66,10 +46,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     mode: "onBlur",
   })
 
-  async function onSubmit(credentials: LoginCredentials) {
+  async function onSubmit(credentials: RegisterRequestDTO) {
     setServerError(null)
 
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -91,10 +71,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       return
     }
 
-    toast.success("Signed in", {
-      description: "Welcome back to Ordering.",
+    toast.success("Account created", {
+      description: "Your session is ready.",
     })
-    router.replace(safeRedirectTo)
+    router.replace("/app")
     router.refresh()
   }
 
@@ -130,10 +110,9 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                 Ordering
               </span>
             </motion.div>
-            <CardTitle>Welcome back</CardTitle>
+            <CardTitle>Create account</CardTitle>
             <CardDescription>
-              Sign in to manage orders, checkout faster, and keep your session
-              protected.
+              Register to start ordering and keep your checkout session ready.
             </CardDescription>
           </CardHeader>
 
@@ -159,8 +138,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                 <Input
                   id="password"
                   type="password"
-                  autoComplete="current-password"
-                  placeholder="Your password"
+                  autoComplete="new-password"
+                  placeholder="Create a password"
                   aria-invalid={Boolean(errors.password)}
                   {...register("password")}
                 />
@@ -173,7 +152,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
 
               {serverError ? (
                 <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-                  <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
                   <p>{serverError}</p>
                 </div>
               ) : null}
@@ -187,11 +166,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in
+                    Creating account
                   </>
                 ) : (
                   <>
-                    Sign in
+                    Sign up
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

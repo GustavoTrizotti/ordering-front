@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion } from "framer-motion"
 import { ArrowLeft, Loader2, PackageCheck } from "lucide-react"
@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import z from "zod"
 
 import { ShopNavbar } from "@/components/shop-home/shop-navbar"
@@ -43,6 +44,7 @@ export function CheckoutPage() {
   const items = useCartStore((state) => state.items)
   const clearCart = useCartStore((state) => state.clearCart)
   const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const didRedirectEmptyCart = useRef(false)
   const [selectedProductIds, setSelectedProductIds] = useState(
     () => new Set(items.map((item) => item.product.id))
   )
@@ -72,14 +74,30 @@ export function CheckoutPage() {
     },
   })
 
+  useEffect(() => {
+    if (items.length > 0 || didRedirectEmptyCart.current) return
+
+    didRedirectEmptyCart.current = true
+    toast.error("Permission denied", {
+      description: "Add at least one item to your cart before checkout.",
+    })
+    router.replace("/app")
+  }, [items.length, router])
+
   function toggleItem(productId: string) {
     setSelectedProductIds((currentIds) => {
       const nextIds = new Set(currentIds)
 
       if (nextIds.has(productId)) {
         nextIds.delete(productId)
+        toast.info("Item unselected", {
+          description: "It will not be included in this order.",
+        })
       } else {
         nextIds.add(productId)
+        toast.success("Item selected", {
+          description: "It will be included in this order.",
+        })
       }
 
       return nextIds
@@ -89,16 +107,26 @@ export function CheckoutPage() {
   async function onSubmit(values: CheckoutFormValues) {
     if (selectedItems.length === 0) return
 
-    await createOrderMutation.mutateAsync({
-      ...values,
-      items: selectedItems.map((item) => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-        price: item.product.price,
-      })),
-    })
+    try {
+      await createOrderMutation.mutateAsync({
+        ...values,
+        items: selectedItems.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          price: item.product.price,
+        })),
+      })
+    } catch {
+      toast.error("Could not register order", {
+        description: "Please review the order and try again.",
+      })
+      return
+    }
 
     clearCart()
+    toast.success("Order registered", {
+      description: "Your order was sent to the server.",
+    })
     router.push("/app/orders")
   }
 

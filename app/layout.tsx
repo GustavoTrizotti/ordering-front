@@ -4,6 +4,7 @@ import "./globals.css"
 
 import { AppQueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 import { Metadata } from "next"
 
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <AppQueryProvider>{children}</AppQueryProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

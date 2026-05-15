@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, useScroll, useMotionValueEvent } from "framer-motion"
-import { Menu, X, ArrowRight } from "lucide-react"
+import { LogIn, Menu, UserPlus, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Logo } from "../ui/logo"
@@ -61,10 +61,22 @@ export function LandingPageNavbar() {
               {link.name}
             </Link>
           ))}
-          <button className="flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-neutral-200">
-            Get Started
-            <ArrowRight className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="flex items-center gap-2 rounded-full border border-neutral-800 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-900"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
+              className="flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-neutral-200"
+            >
+              <UserPlus className="h-4 w-4" />
+              Sign up
+            </Link>
+          </div>
         </div>
 
         <button
@@ -92,10 +104,24 @@ export function LandingPageNavbar() {
                   {link.name}
                 </Link>
               ))}
-              <button className="mt-4 flex items-center gap-2 rounded-full bg-white px-8 py-3 text-lg font-semibold text-black">
-                Get Started
-                <ArrowRight className="h-5 w-5" />
-              </button>
+              <div className="mt-4 flex flex-col gap-3">
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-full border border-neutral-800 px-8 py-3 text-lg font-semibold text-white"
+                >
+                  <LogIn className="h-5 w-5" />
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 text-lg font-semibold text-black"
+                >
+                  <UserPlus className="h-5 w-5" />
+                  Sign up
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}

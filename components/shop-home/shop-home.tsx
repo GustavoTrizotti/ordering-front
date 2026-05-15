@@ -5,6 +5,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight, ShoppingBag, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -60,6 +61,13 @@ function formatCurrency(value: number) {
 function ProductCard({ product }: { product: ShopProduct }) {
   const addItem = useCartStore((state) => state.addItem)
 
+  function handleAddToCart() {
+    addItem(product)
+    toast.success("Added to cart", {
+      description: `${product.name} is ready for checkout.`,
+    })
+  }
+
   return (
     <Card className="group overflow-hidden">
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-900">
@@ -100,7 +108,7 @@ function ProductCard({ product }: { product: ShopProduct }) {
 
         <Button
           type="button"
-          onClick={() => addItem(product)}
+          onClick={handleAddToCart}
           className="h-10 w-full rounded-full bg-white text-black hover:bg-neutral-200"
         >
           Add to cart
@@ -167,6 +175,20 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   const clearCart = useCartStore((state) => state.clearCart)
   const subtotal = useCartStore((state) => state.getSubtotal())
 
+  function handleRemoveItem(productId: string, productName: string) {
+    removeItem(productId)
+    toast.info("Removed from cart", {
+      description: `${productName} was removed from your cart.`,
+    })
+  }
+
+  function handleClearCart() {
+    clearCart()
+    toast.info("Cart cleared", {
+      description: "All cart items were removed.",
+    })
+  }
+
   if (!isOpen) return null
 
   return (
@@ -229,7 +251,9 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   </p>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.product.id)}
+                    onClick={() =>
+                      handleRemoveItem(item.product.id, item.product.name)
+                    }
                     className="mt-2 text-xs font-medium text-neutral-500 transition-colors hover:text-white"
                   >
                     Remove
@@ -251,7 +275,7 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             <Button
               type="button"
               variant="outline"
-              onClick={clearCart}
+              onClick={handleClearCart}
               disabled={items.length === 0}
               className="h-11 rounded-full border-neutral-800 bg-black text-white hover:bg-neutral-900"
             >
@@ -262,6 +286,9 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
               disabled={items.length === 0}
               onClick={() => {
                 onClose()
+                toast.message("Review your order", {
+                  description: "Confirm customer, address, and selected items.",
+                })
                 router.push("/app/checkout")
               }}
               className="h-11 rounded-full bg-white text-black hover:bg-neutral-200"
