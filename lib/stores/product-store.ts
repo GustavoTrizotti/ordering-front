@@ -2,11 +2,7 @@
 
 import { create } from "zustand"
 
-export type ProductSection =
-  | "featured"
-  | "sale"
-  | "new-arrival"
-  | "best-seller"
+export type ProductSection = "featured" | "sale" | "new-arrival" | "best-seller"
 
 export type ShopProduct = {
   id: string
@@ -27,7 +23,7 @@ type ProductStore = {
 
 const initialProducts: ShopProduct[] = [
   {
-    id: "urban-field-jacket",
+    id: "2b3c4d5e-6f70-4b2c-9d0e-1f2a3b4c5d6e",
     name: "Urban Field Jacket",
     description: "Weather-ready layers with a clean everyday silhouette.",
     price: 128,
@@ -37,7 +33,7 @@ const initialProducts: ShopProduct[] = [
     sections: ["featured", "sale", "best-seller"],
   },
   {
-    id: "signal-headphones",
+    id: "3c4d5e6f-7081-4c3d-0e1f-2a3b4c5d6e7f",
     name: "Signal Headphones",
     description: "Low-profile wireless audio tuned for focused workdays.",
     price: 96,
@@ -46,7 +42,7 @@ const initialProducts: ShopProduct[] = [
     sections: ["featured", "new-arrival"],
   },
   {
-    id: "mono-watch",
+    id: "4d5e6f70-8192-4d4e-1f2a-3b4c5d6e7f80",
     name: "Mono Watch",
     description: "A minimal steel watch with crisp contrast and quiet detail.",
     price: 142,
@@ -54,34 +50,6 @@ const initialProducts: ShopProduct[] = [
     category: "Accessories",
     image: "/product-watch.jpg",
     sections: ["sale", "best-seller"],
-  },
-  {
-    id: "commuter-pack",
-    name: "Commuter Pack",
-    description: "Compact storage for daily routes, devices, and essentials.",
-    price: 88,
-    category: "Bags",
-    image: "/product-jacket.jpg",
-    sections: ["new-arrival", "best-seller"],
-  },
-  {
-    id: "studio-tee",
-    name: "Studio Tee",
-    description: "Soft heavyweight cotton with a structured black finish.",
-    price: 42,
-    previousPrice: 56,
-    category: "Essentials",
-    image: "/product-headphones.jpg",
-    sections: ["sale", "new-arrival"],
-  },
-  {
-    id: "travel-organizer",
-    name: "Travel Organizer",
-    description: "Slim modular carry for chargers, cards, and small gear.",
-    price: 38,
-    category: "Accessories",
-    image: "/product-watch.jpg",
-    sections: ["featured", "best-seller"],
   },
 ]
 

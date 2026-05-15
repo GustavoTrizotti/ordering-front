@@ -70,7 +70,7 @@ function ProductCard({ product }: { product: ShopProduct }) {
 
   return (
     <Card className="group overflow-hidden">
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-900">
+      <div className="relative aspect-4/3 overflow-hidden bg-neutral-900">
         <Image
           src={product.image}
           alt={product.name}
