@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   AddItemsToOrderRequestDTO,
   ApplyDiscountRequestDTO,
+  ApplyDiscountResponseDTO,
   ChangeOrderStatusRequestDTO,
   CreateOrderBodyDTO,
   UpdateOrderItemQuantityRequestDTO,
@@ -105,7 +106,8 @@ export function useApplyDiscountMutation() {
     }: {
       orderId: string
       body: ApplyDiscountRequestDTO
-    }) => ordersService.applyDiscount(orderId, body),
+    }): Promise<ApplyDiscountResponseDTO | undefined> =>
+      ordersService.applyDiscount(orderId, body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ordersQueryKey })
     },

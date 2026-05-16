@@ -17,9 +17,9 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            "border border-neutral-800 bg-black text-white shadow-xl shadow-black/30",
+            "border border-white bg-black text-white shadow-xl shadow-black/30",
           title: "text-sm font-medium text-white",
-          description: "text-neutral-400",
+          description: "text-white/80",
           icon: "text-white",
           actionButton: "rounded-full bg-white text-black",
           cancelButton: "rounded-full bg-neutral-900 text-white",

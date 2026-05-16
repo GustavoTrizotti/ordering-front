@@ -3,18 +3,26 @@
 import Image from "next/image"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowRight, ShoppingBag, X } from "lucide-react"
+import { ArrowRight, Loader2, ShoppingBag, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  ordersQueryKey,
+  useAddItemsToOrderMutation,
+} from "@/lib/api/orders-hooks"
+import { ListOrdersOrderResponseDTO } from "@/lib/api/order-dtos"
 import { useCartStore } from "@/lib/stores/cart-store"
+import { useOrdersStore } from "@/lib/stores/orders-store"
 import {
   ProductSection,
   ShopProduct,
   useProductStore,
 } from "@/lib/stores/product-store"
+import { cn } from "@/lib/utils"
 
 import { ShopNavbar } from "./shop-navbar"
 
@@ -119,6 +127,50 @@ function ProductCard({ product }: { product: ShopProduct }) {
   )
 }
 
+function ProductFilterList() {
+  const [selectedFilter, setSelectedFilter] = useState(productSections[0].id)
+  const filters = [
+    ...productSections.map((section) => ({
+      id: section.id,
+      label: section.title,
+    })),
+    { id: "categories", label: "Categories" },
+  ]
+
+  function handleFilterClick(id: string) {
+    setSelectedFilter(id)
+    document.getElementById(id)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }
+
+  return (
+    <section
+      aria-label="Shop product filters"
+      className="sticky top-[73px] z-30 -mx-6 border-y border-neutral-900 bg-black/85 px-6 py-4 backdrop-blur-xl"
+    >
+      <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto">
+        {filters.map((filter) => (
+          <Button
+            key={filter.id}
+            type="button"
+            variant="outline"
+            onClick={() => handleFilterClick(filter.id)}
+            className={cn(
+              "h-10 shrink-0 rounded-full border-neutral-800 bg-neutral-950 px-4 text-neutral-200 hover:bg-neutral-900 hover:text-white",
+              selectedFilter === filter.id &&
+                "border-secondary bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:text-secondary-foreground"
+            )}
+          >
+            {filter.label}
+          </Button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ProductSectionBlock({
   id,
   title,
@@ -158,7 +210,11 @@ function ProductSectionBlock({
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.45, delay: index * 0.05, ease: "easeOut" }}
+            transition={{
+              duration: 0.45,
+              delay: index * 0.05,
+              ease: "easeOut",
+            }}
           >
             <ProductCard product={product} />
           </motion.div>
@@ -168,12 +224,23 @@ function ProductSectionBlock({
   )
 }
 
-function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function CartPanel({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const addItemsToOrderMutation = useAddItemsToOrderMutation()
   const items = useCartStore((state) => state.items)
   const removeItem = useCartStore((state) => state.removeItem)
   const clearCart = useCartStore((state) => state.clearCart)
+  const editingOrderId = useCartStore((state) => state.editingOrderId)
+  const clearOrderEdit = useCartStore((state) => state.clearOrderEdit)
   const subtotal = useCartStore((state) => state.getSubtotal())
+  const updateOrder = useOrdersStore((state) => state.updateOrder)
 
   function handleRemoveItem(productId: string, productName: string) {
     removeItem(productId)
@@ -184,9 +251,55 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
   function handleClearCart() {
     clearCart()
+    clearOrderEdit()
     toast.info("Cart cleared", {
       description: "All cart items were removed.",
     })
+  }
+
+  async function handleUpdateExistingOrder() {
+    if (!editingOrderId || items.length === 0) return
+
+    try {
+      const response = await addItemsToOrderMutation.mutateAsync({
+        orderId: editingOrderId,
+        body: {
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price,
+          })),
+        },
+      })
+
+      updateOrder(editingOrderId, (order) => ({
+        ...order,
+        items: response.items,
+      }))
+      queryClient.setQueryData<ListOrdersOrderResponseDTO[]>(
+        ordersQueryKey,
+        (orders) =>
+          orders?.map((order) =>
+            order.orderId === editingOrderId
+              ? {
+                  ...order,
+                  items: response.items,
+                }
+              : order
+          )
+      )
+      clearCart()
+      clearOrderEdit()
+      onClose()
+      toast.success("Order updated", {
+        description: "The selected items were added to the order.",
+      })
+      router.push("/app/orders")
+    } catch {
+      toast.error("Could not update order", {
+        description: "Please review the cart and try again.",
+      })
+    }
   }
 
   if (!isOpen) return null
@@ -208,9 +321,14 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-xs font-medium tracking-wider text-neutral-500 uppercase">
-              Current order
+              {editingOrderId ? "Add items to order" : "Current order"}
             </p>
             <h2 className="mt-1 text-2xl font-bold tracking-tight">Cart</h2>
+            {editingOrderId ? (
+              <p className="mt-1 font-mono text-xs text-neutral-600">
+                {editingOrderId}
+              </p>
+            ) : null}
           </div>
           <Button
             type="button"
@@ -285,6 +403,11 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
               type="button"
               disabled={items.length === 0}
               onClick={() => {
+                if (editingOrderId) {
+                  void handleUpdateExistingOrder()
+                  return
+                }
+
                 onClose()
                 toast.message("Review your order", {
                   description: "Confirm customer, address, and selected items.",
@@ -293,7 +416,10 @@ function CartPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
               }}
               className="h-11 rounded-full bg-white text-black hover:bg-neutral-200"
             >
-              Checkout
+              {addItemsToOrderMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : null}
+              {editingOrderId ? "Update order" : "Checkout"}
             </Button>
           </div>
         </div>
@@ -367,6 +493,7 @@ export function ShopHome() {
       </section>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
+        <ProductFilterList />
         {productSections.map((section) => (
           <ProductSectionBlock
             key={section.id}

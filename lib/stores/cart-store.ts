@@ -11,7 +11,12 @@ export type CartItem = {
 
 type CartStore = {
   items: CartItem[]
+  editingOrderId: string | null
+  editingOrderOriginalProductIds: string[]
   addItem: (product: ShopProduct) => void
+  setItems: (items: CartItem[]) => void
+  startOrderEdit: (orderId: string) => void
+  clearOrderEdit: () => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -21,6 +26,8 @@ type CartStore = {
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
+  editingOrderId: null,
+  editingOrderOriginalProductIds: [],
   addItem: (product) =>
     set((state) => {
       const existingItem = state.items.find(
@@ -41,6 +48,15 @@ export const useCartStore = create<CartStore>((set, get) => ({
         items: [...state.items, { product, quantity: 1 }],
       }
     }),
+  setItems: (items) => set({ items }),
+  startOrderEdit: (orderId) =>
+    set({
+      editingOrderId: orderId,
+      editingOrderOriginalProductIds: [],
+      items: [],
+    }),
+  clearOrderEdit: () =>
+    set({ editingOrderId: null, editingOrderOriginalProductIds: [] }),
   removeItem: (productId) =>
     set((state) => ({
       items: state.items.filter((item) => item.product.id !== productId),

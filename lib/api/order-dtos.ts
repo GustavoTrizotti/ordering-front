@@ -78,26 +78,27 @@ export const updateOrderItemQuantityResponseSchema =
 
 export const applyDiscountRequestSchema = z
   .object({
-    discountIds: z.array(idSchema).min(1),
+    discountIds: z.array(idSchema),
   })
   .strict()
 
 export const appliedDiscountSchema = z
   .object({
     discountId: idSchema,
-    discountType: z.string().min(1),
-    active: z.boolean(),
-    expiration: z.string().min(1),
-    createdAt: z.string().datetime(),
+    discountType: z.string().min(1).nullable().optional(),
+    active: z.boolean().nullable().optional(),
+    expiration: z.string().min(1).nullable().optional(),
+    expiredDate: z.string().min(1).nullable().optional(),
+    createdAt: z.string().nullable().optional(),
   })
-  .strict()
+  .passthrough()
 
 export const applyDiscountResponseSchema = z
   .object({
     orderId: idSchema,
-    appliedDiscounts: z.array(appliedDiscountSchema),
+    appliedDiscounts: z.array(appliedDiscountSchema).optional().default([]),
   })
-  .strict()
+  .passthrough()
 
 export const listOrdersDiscountResponseSchema = z
   .object({
@@ -111,6 +112,7 @@ export const listOrdersItemResponseSchema = orderItemResponseSchema
 
 export const listOrdersOrderResponseSchema = z
   .object({
+    name: z.string().min(1),
     orderId: idSchema,
     status: z.string().min(1),
     items: z.array(listOrdersItemResponseSchema),
@@ -118,7 +120,18 @@ export const listOrdersOrderResponseSchema = z
   })
   .strict()
 
-export const listOrdersResponseSchema = z.array(listOrdersOrderResponseSchema)
+const listOrdersOrderApiResponseSchema = listOrdersOrderResponseSchema.omit({
+  name: true,
+})
+
+export const listOrdersResponseSchema = z
+  .array(listOrdersOrderApiResponseSchema)
+  .transform((orders) =>
+    orders.map((order, index) => ({
+      ...order,
+      name: `Order ${index + 1}`,
+    }))
+  )
 
 export const getEligibleDiscountsRequestParamsSchema = z
   .object({
@@ -162,7 +175,9 @@ export type UpdateOrderItemQuantityResponseDTO = z.infer<
   typeof updateOrderItemQuantityResponseSchema
 >
 export type ApplyDiscountRequestDTO = z.infer<typeof applyDiscountRequestSchema>
-export type ApplyDiscountResponseDTO = z.infer<typeof applyDiscountResponseSchema>
+export type ApplyDiscountResponseDTO = z.infer<
+  typeof applyDiscountResponseSchema
+>
 export type ListOrdersOrderResponseDTO = z.infer<
   typeof listOrdersOrderResponseSchema
 >

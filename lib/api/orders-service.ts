@@ -94,11 +94,14 @@ export const ordersService = {
   },
 
   applyDiscount(orderId: string, body: ApplyDiscountRequestDTO) {
-    return apiRequest<ApplyDiscountRequestDTO, ApplyDiscountResponseDTO>({
+    return apiRequest<
+      ApplyDiscountRequestDTO,
+      ApplyDiscountResponseDTO | undefined
+    >({
       method: "PATCH",
       path: `/orders/${encodeURIComponent(orderId)}/discounts`,
       requestSchema: applyDiscountRequestSchema,
-      responseSchema: applyDiscountResponseSchema,
+      responseSchema: applyDiscountResponseSchema.optional(),
       body,
     })
   },
