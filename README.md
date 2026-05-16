@@ -1,51 +1,154 @@
-# Next.js template
+# Ordering
 
-This is a Next.js template with shadcn/ui.
+Projeto desenvolvido no contexto do Trabalho Prático da disciplina **Verificação, Validação e Teste de Software** (IFSP Câmpus São Carlos – Prof. Dr. Lucas Oliveira).
 
-## Project guidelines
+## Regras de negócio (alto nível)
+- Criar pedido
+- Alterar pedido (SKUs/itens, quantidades, etc.)
+- Atualizar status (mover para o próximo status válido)
+- Calcular valores totais (bruto e líquido)
+- Consultar descontos elegíveis dado o estado/valor do pedido
+- Aplicar desconto(s) e finalizar/cancelar pedido
 
-This project should remain primarily a route-protected Next.js v16 app using
-client-side rendering for interactive application surfaces. Avoid making major
-server-side rendering the normative architecture; use SSR only where it is
-needed for routing, session checks, metadata, or data that benefits from server
-execution.
+## Execução Local com Docker
 
-## Running with the local Spring API
+A aplicação pode ser executada localmente de duas formas:
 
-The backend Docker Compose file only starts Postgres. Keep the Spring API
-running from IntelliJ on the host machine, then run this frontend container with
-two API base URLs:
+1. **Ambiente de produção local**
+2. **Ambiente de desenvolvimento local**
+
+---
+
+### Variáveis de ambiente
+
+Antes de executar o projeto, crie um arquivo chamado `.env` na raiz do projeto.
+
+Você pode usar o arquivo `.env.example` como base:
+
+```bash
+cp .env.example .env
+```
+
+Exemplo de `.env`:
 
 ```env
+AUTH_SECRET=change-me-with-a-secure-random-string
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 API_INTERNAL_BASE_URL=http://host.docker.internal:8080
 ```
 
-`NEXT_PUBLIC_API_BASE_URL` is used by browser-side requests, where `localhost`
-means the host machine. `API_INTERNAL_BASE_URL` is used by Next.js route
-handlers running inside Docker, where `localhost` means the frontend container,
-so it needs Docker Desktop's host bridge address instead.
+#### `AUTH_SECRET`
 
-After changing either value, rebuild the frontend image:
+Chave usada pela camada de autenticação da aplicação.
+
+Ela é obrigatória para o build e para a execução da aplicação em produção local.
+
+Exemplo:
+
+```env
+AUTH_SECRET=uma-chave-secreta-com-mais-de-32-caracteres
+```
+
+Para gerar uma chave segura, você pode usar:
+
+```bash
+npx auth secret
+```
+
+#### `NEXT_PUBLIC_API_BASE_URL`
+
+URL base da API usada pelo frontend.
+
+Para execução apenas do frontend, sem backend real disponível, você pode manter:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+Caso o backend esteja rodando em outra porta ou endereço, altere o valor conforme necessário.
+
+Exemplo:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://api.exemplo.com
+```
+
+---
+
+### Ambiente de produção local
+
+O ambiente de produção local simula a forma como a aplicação seria executada após o build.
+
+Nesse modo:
+
+- O Next.js executa o build da aplicação;
+- A aplicação é iniciada em modo production;
+- Não há hot reload;
+- É o modo mais indicado para apresentação, entrega e validação final.
+
+#### Como executar
+
+Na raiz do projeto, rode:
 
 ```bash
 docker compose up --build
 ```
 
-## Adding components
+Depois acesse:
 
-To add components to your app, run the following command:
+```txt
+http://localhost:3000
+```
+
+#### Como parar
 
 ```bash
-npx shadcn@latest add button
+docker compose down
 ```
 
-This will place the ui components in the `components` directory.
+---
 
-## Using components
+### Ambiente de desenvolvimento local
 
-To use the components in your app, import them as follows:
+O ambiente de desenvolvimento local é usado durante a implementação da aplicação.
 
-```tsx
-import { Button } from "@/components/ui/button";
+Nesse modo:
+
+- O Next.js roda com `npm run dev`;
+- O código local é montado dentro do container;
+- Alterações no código refletem automaticamente na aplicação;
+- É indicado para desenvolvimento diário.
+
+#### Como executar
+
+Na raiz do projeto, rode:
+
+```bash
+docker compose -f docker-compose.dev.yaml up --build
 ```
+
+Depois acesse:
+
+```txt
+http://localhost:3000
+```
+
+#### Como parar
+
+```bash
+docker compose -f docker-compose.dev.yaml down
+```
+
+---
+
+### 5. Diferença entre produção local e desenvolvimento local
+
+| Característica | Produção local | Desenvolvimento local |
+|---|---|---|
+| Arquivo Compose | `docker-compose.yaml` | `docker-compose.dev.yaml` |
+| Dockerfile | `Dockerfile` | `Dockerfile.dev` |
+| Comando principal | `npm run build` + `node server.js` | `npm run dev` |
+| Hot reload | Não | Sim |
+| Performance | Mais próxima de produção | Mais focada em desenvolvimento |
+| Uso recomendado | Entrega e apresentação | Desenvolvimento diário |
+| Precisa rebuildar após mudanças? | Sim | Normalmente não |
