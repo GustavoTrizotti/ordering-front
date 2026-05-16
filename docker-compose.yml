@@ -5,13 +5,22 @@ services:
       dockerfile: Dockerfile
       args:
         AUTH_SECRET: ${AUTH_SECRET}
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        API_INTERNAL_BASE_URL: ${API_INTERNAL_BASE_URL}
+
     container_name: ordering-front
+
     ports:
       - "3000:3000"
+
     env_file:
       - .env
+
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       AUTH_SECRET: ${AUTH_SECRET}
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      API_INTERNAL_BASE_URL: ${API_INTERNAL_BASE_URL}
+
     restart: unless-stopped

@@ -10,6 +10,28 @@ server-side rendering the normative architecture; use SSR only where it is
 needed for routing, session checks, metadata, or data that benefits from server
 execution.
 
+## Running with the local Spring API
+
+The backend Docker Compose file only starts Postgres. Keep the Spring API
+running from IntelliJ on the host machine, then run this frontend container with
+two API base URLs:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+API_INTERNAL_BASE_URL=http://host.docker.internal:8080
+```
+
+`NEXT_PUBLIC_API_BASE_URL` is used by browser-side requests, where `localhost`
+means the host machine. `API_INTERNAL_BASE_URL` is used by Next.js route
+handlers running inside Docker, where `localhost` means the frontend container,
+so it needs Docker Desktop's host bridge address instead.
+
+After changing either value, rebuild the frontend image:
+
+```bash
+docker compose up --build
+```
+
 ## Adding components
 
 To add components to your app, run the following command:

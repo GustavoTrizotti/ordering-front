@@ -13,8 +13,16 @@ import {
   refreshRequestSchema,
 } from "@/lib/types/auth-dtos"
 
-const apiBaseUrl =
+const serverApiBaseUrl =
+  process.env.API_INTERNAL_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://localhost:8080"
+
+const browserApiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"
+
+const apiBaseUrl =
+  typeof window === "undefined" ? serverApiBaseUrl : browserApiBaseUrl
 
 type ApiRequestOptions<TRequest> = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
